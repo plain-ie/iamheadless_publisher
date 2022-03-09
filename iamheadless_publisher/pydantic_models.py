@@ -1,3 +1,5 @@
+from typing import Optional
+
 from djantic import ModelSchema
 
 from . import utils
@@ -11,6 +13,28 @@ from . import utils
 class ItemSchema(ModelSchema):
     class Config:
         model = utils.get_item_model()
+        exclude = [
+            'boolean_lookup_indexes',
+            'children',
+            'date_lookup_indexes',
+            'datetime_lookup_indexes',
+            'float_lookup_indexes',
+            'text_lookup_indexes',
+        ]
+
+
+class NestedItemSchema(ModelSchema):
+    class Config:
+        model = utils.get_item_model()
+        exclude = [
+            'boolean_lookup_indexes',
+            'children',
+            'date_lookup_indexes',
+            'datetime_lookup_indexes',
+            'float_lookup_indexes',
+            'parents',
+            'text_lookup_indexes',
+        ]
 
 
 class ItemRelationSchema(ModelSchema):
