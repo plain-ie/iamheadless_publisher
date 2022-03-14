@@ -33,5 +33,5 @@ setup(
         "djantic==0.4.1",
         "pydantic==1.9.0",
     ],
-
+    
 )
