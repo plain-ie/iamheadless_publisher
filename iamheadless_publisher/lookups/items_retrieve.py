@@ -18,6 +18,7 @@ def retrieve_items(
         unpublished=None,
         tenant_ids=None,
         ordering='-created_at',
+        item_pydantic_model=None,
         ):
 
     # --
@@ -25,6 +26,9 @@ def retrieve_items(
     Item = utils.get_item_model()
 
     # --
+
+    if item_pydantic_model is None:
+        item_pydantic_model = ItemSchema
 
     if format not in ALLOWED_FORMATS:
         raise ValueError(f'format "{format}" is not supported')
@@ -52,7 +56,7 @@ def retrieve_items(
 
     # --
 
-    queryset = Item.objects.all()
+    queryset = Item.objects.all().prefetch_related('parents')
 
     if item_ids is not None:
         queryset = queryset.filter(id__in=item_ids)
@@ -74,7 +78,7 @@ def retrieve_items(
 
     # --
 
-    paginated_data = pagination(queryset, page, count, ItemSchema)
+    paginated_data = pagination(queryset, page, count, item_pydantic_model)
 
     if format == 'dict':
         return paginated_data.dict

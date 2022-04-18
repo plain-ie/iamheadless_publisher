@@ -6,7 +6,8 @@ from ..pydantic_models import ItemSchema
 
 def create_item(
         data={},
-        format='queryset'
+        format='queryset',
+        item_pydantic_model=None
         ):
 
     # --
@@ -16,12 +17,15 @@ def create_item(
 
     # --
 
+    if item_pydantic_model is None:
+        item_pydantic_model = ItemSchema
+
     if format not in ALLOWED_FORMATS:
         raise ValueError(f'format "{format}" is not supported')
 
     # --
 
-    parent_relations = data.pop('parents', {})
+    parent_relations = data.pop('parent_relations', {})
     indexes = data.pop('indexes', {})
 
     # --
@@ -30,19 +34,6 @@ def create_item(
     item_id = instance.id
 
     # --
-
-    new_parent_relation_ids = []
-
-    for key in parent_relations.keys():
-        for x in parent_relations[key]:
-
-            relation_instance = ItemRelation.objects.create(
-                parent_id=x['item_id'],
-                child_id=item_id,
-                status=x['status'],
-            )
-
-            new_parent_relation_ids.append(relation_instance.id)
 
     for key in indexes.keys():
 
@@ -80,7 +71,7 @@ def create_item(
 
     if format in ['dict', 'json']:
 
-        pydantic_model = ItemSchema.from_django(instance)
+        pydantic_model = item_pydantic_model.from_django(instance)
 
         if format == 'dict':
             return pydantic_model.dict()

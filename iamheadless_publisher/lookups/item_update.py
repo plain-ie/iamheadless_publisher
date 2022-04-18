@@ -36,16 +36,18 @@ def update_item(
         # Must have .get()
 
         Item.objects.filter(id=item_id).update(**data)
-
+        
         new_parent_relation_ids = []
 
         for key in parent_relations.keys():
             for x in parent_relations[key]:
+
                 relation_instance = ItemRelation.objects.create(
                     parent_id=x['item_id'],
                     child_id=item_id,
                     status=x['status'],
                 )
+
                 new_parent_relation_ids.append(relation_instance.id)
 
         for key in indexes.keys():

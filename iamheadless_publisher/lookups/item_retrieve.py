@@ -11,7 +11,9 @@ from .index_filters import filter_by_lookup_indexes
 def retrieve_item(
         item_id,
         lookup_field='id',
-        format='queryset'
+        format='queryset',
+        item_pydantic_model=None,
+        nested_item_pydantic_model=None,
         ):
 
     # --
@@ -20,6 +22,12 @@ def retrieve_item(
     ItemRelation = utils.get_item_relation_model()
 
     # --
+
+    if item_pydantic_model is None:
+        item_pydantic_model = ItemSchema
+
+    if nested_item_pydantic_model is None:
+        nested_item_pydantic_model = NestedItemSchema
 
     if format not in ALLOWED_FORMATS:
         raise ValueError(f'format "{format}" is not supported')
@@ -49,7 +57,7 @@ def retrieve_item(
     if format in ['dict', 'json']:
 
         parent_relations = ItemRelation.objects.filter(child=instance).distinct()
-        pydantic_model = ItemSchema.from_django(instance)
+        pydantic_model = item_pydantic_model.from_django(instance)
 
         dict_value = pydantic_model.dict()
 
@@ -58,7 +66,7 @@ def retrieve_item(
             for x in parent_relations:
                 if x.status not in dict_value['parents'].keys():
                     dict_value['parents'][x.status] = []
-                parent = NestedItemSchema.from_django(x.parent)
+                parent = nested_item_pydantic_model.from_django(x.parent)
                 dict_value['parents'][x.status].append(parent.dict())
             return dict_value
 
@@ -68,9 +76,8 @@ def retrieve_item(
         for x in parent_relations:
             if x.status not in dict_value['parents'].keys():
                 dict_value['parents'][x.status] = []
-            parent = NestedItemSchema.from_django(x.parent)
+            parent = nested_item_pydantic_model.from_django(x.parent)
             dict_value['parents'][x.status].append(json.loads(parent.json()))
-
         return json.dumps(dict_value)
 
     return instance
