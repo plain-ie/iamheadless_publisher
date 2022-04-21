@@ -18,7 +18,7 @@ def create_item(
     # --
 
     if item_pydantic_model is None:
-        item_pydantic_model = ItemSchema
+        item_id = ItemSchema
 
     if format not in ALLOWED_FORMATS:
         raise ValueError(f'format "{format}" is not supported')

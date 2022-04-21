@@ -20,6 +20,11 @@ class Item(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class DescribeTenant(models.Model):
+    tenant = models.ForeignKey(Tenant, related_name='described_by_item', on_delete=models.CASCADE, blank=True, null=True)
+    item = models.ForeignKey(Item, related_name='described_tenant', on_delete=models.PROTECT)
+
+
 class ItemRelation(models.Model):
     child = models.ForeignKey(Item, related_name='parents', on_delete=models.CASCADE)
     parent = models.ForeignKey(Item, related_name='children', on_delete=models.CASCADE)
